@@ -154,7 +154,10 @@ a {
 .graph-panel,
 .inspector,
 .metric,
-.feed-item {
+.feed-item,
+.system-card,
+.api-card,
+.rag-panel {
   background: var(--panel);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
@@ -353,6 +356,99 @@ a {
   line-height: 1.55;
 }
 
+.platform-section {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.section-heading p {
+  max-width: 860px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.system-grid,
+.api-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.api-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.system-card,
+.api-card,
+.rag-panel {
+  border-radius: 8px;
+}
+
+.system-card,
+.api-card {
+  min-width: 0;
+  padding: 16px;
+}
+
+.system-card h3,
+.api-card strong,
+.rag-panel h3 {
+  display: block;
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+
+.system-card p,
+.api-card p,
+.rag-panel p,
+.pipeline-list {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.rag-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 16px;
+  padding: 18px;
+  align-items: start;
+}
+
+.pipeline-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+
+.pipeline-list li + li {
+  margin-top: 6px;
+}
+
+.method {
+  display: inline-flex;
+  border: 1px solid rgba(39, 99, 122, 0.24);
+  color: var(--blue);
+  background: rgba(39, 99, 122, 0.08);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 @media (max-width: 1100px) {
   .shell {
     grid-template-columns: 1fr;
@@ -365,6 +461,12 @@ a {
   .workspace {
     grid-template-columns: 1fr;
   }
+
+  .system-grid,
+  .api-grid,
+  .rag-panel {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -373,7 +475,8 @@ a {
   }
 
   .topbar,
-  .panel-header {
+  .panel-header,
+  .section-heading {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -392,5 +495,11 @@ a {
 
   .graph-canvas {
     min-height: 460px;
+  }
+
+  .system-grid,
+  .api-grid,
+  .rag-panel {
+    grid-template-columns: 1fr;
   }
 }

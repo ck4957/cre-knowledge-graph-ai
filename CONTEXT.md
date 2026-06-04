@@ -18,7 +18,7 @@ The demo is meant to speak to a Founding Knowledge Graph Engineer role. It shoul
 
 ## Current Scope
 
-This first version is a local Next.js app with:
+This version is a local Next.js app with:
 
 - A visual property context graph
 - Sample CRE entities and relationships
@@ -26,14 +26,17 @@ This first version is a local Next.js app with:
 - Entity resolution scoring helper
 - Temporal active-state helper
 - Architecture and memory docs
+- Postgres/pgvector schema for documents and vector search
+- Neo4j seed path for graph traversal
+- API routes for health, RAG, and graph impact analysis
+- Docker Compose local stack
 
 ## Future Direction
 
 Likely next layers:
 
-- Neo4j or RDF-backed persistence
 - Document ingestion pipeline
 - Hybrid vector and graph retrieval
 - Confidence, provenance, and reviewer workflow
 - Portfolio-level impact analysis
-
+- AWS production deployment with managed databases and observability

@@ -1,15 +1,19 @@
 import {
   AlertTriangle,
   ArrowRight,
+  Brain,
   Building2,
   CheckCircle2,
   Clock3,
+  Cloud,
+  Database,
   FileText,
   GitBranch,
   Layers3,
   Network,
   Scale,
   Search,
+  Server,
   ShieldCheck
 } from "lucide-react";
 import { activeRelationships, graphEdges, graphNodes, leaseExtractionExample } from "@/lib/graph/sample-data";
@@ -29,6 +33,47 @@ const nodePositions: Record<string, { x: number; y: number }> = {
 };
 
 const relationshipHighlights = activeRelationships(new Date("2026-06-03"));
+
+const systemLayers = [
+  {
+    icon: <Database size={19} />,
+    title: "Postgres + pgvector",
+    text: "Stores source documents, extraction events, entity-resolution candidates, and vector embeddings for retrieval."
+  },
+  {
+    icon: <GitBranch size={19} />,
+    title: "Neo4j graph database",
+    text: "Models tenants, spaces, leases, amendments, permits, and obligations as traversable graph facts."
+  },
+  {
+    icon: <Brain size={19} />,
+    title: "Graph-augmented RAG",
+    text: "Retrieves lease evidence with vector search, then expands through graph impact paths before forming an answer."
+  },
+  {
+    icon: <Cloud size={19} />,
+    title: "AWS-ready topology",
+    text: "Containerized app can deploy to ECS/App Runner with RDS PostgreSQL and a managed or containerized graph layer."
+  }
+];
+
+const apiExamples = [
+  {
+    method: "GET",
+    path: "/api/health",
+    text: "Checks Postgres chunk count and Neo4j node/relationship counts."
+  },
+  {
+    method: "POST",
+    path: "/api/rag",
+    text: "Runs vector retrieval plus graph impact traversal for a CRE question."
+  },
+  {
+    method: "GET",
+    path: "/api/graph/impact?tenant=Northstar%20Logistics",
+    text: "Returns tenant-space-lease-amendment-obligation paths from Neo4j."
+  }
+];
 
 export default function Home() {
   const activeLeaseCount = graphEdges.filter((edge) => edge.type === "LEASES" && isActive(edge, new Date("2026-06-03"))).length;
@@ -163,6 +208,57 @@ export default function Home() {
             </section>
           </aside>
         </section>
+
+        <section className="platform-section" aria-label="Deployable AI engineering system">
+          <div className="section-heading">
+            <div>
+              <h2>Deployable AI engineering architecture</h2>
+              <p>
+                The demo now runs as a containerized application with a local relational/vector database, a graph
+                database, seeded data, and API routes that exercise the full RAG and graph path.
+              </p>
+            </div>
+            <div className="status-pill">
+              <Server size={17} />
+              Docker compose ready
+            </div>
+          </div>
+
+          <div className="system-grid">
+            {systemLayers.map((layer) => (
+              <article className="system-card" key={layer.title}>
+                {layer.icon}
+                <h3>{layer.title}</h3>
+                <p>{layer.text}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="rag-panel">
+            <div>
+              <h3>RAG flow under the hood</h3>
+              <ol className="pipeline-list">
+                <li>Lease, amendment, and permit chunks are embedded and stored in `document_chunks.embedding`.</li>
+                <li>`/api/rag` embeds the question and ranks chunks with pgvector cosine distance.</li>
+                <li>The detected tenant is sent to Neo4j for lease, amendment, obligation, permit, and space traversal.</li>
+                <li>The response returns answer text, citations, graph facts, and whether it used live databases.</li>
+              </ol>
+            </div>
+            <pre className="source-code">{`curl -X POST http://localhost:3000/api/rag \\
+  -H "Content-Type: application/json" \\
+  -d '{"question":"What CAM obligation changed for Northstar?"}'`}</pre>
+          </div>
+
+          <div className="api-grid">
+            {apiExamples.map((example) => (
+              <article className="api-card" key={example.path}>
+                <span className="method">{example.method}</span>
+                <strong>{example.path}</strong>
+                <p>{example.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
@@ -229,4 +325,3 @@ function FeedItem({ icon, title, text }: { icon: React.ReactNode; title: string;
     </li>
   );
 }
-

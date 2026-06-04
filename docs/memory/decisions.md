@@ -16,3 +16,14 @@ The first lease extraction schema is a TypeScript object instead of a provider-s
 
 The first implementation uses typed sample graph data rather than a database. This keeps the portfolio demo easy to run while preserving a clean path to Neo4j, Neptune, RDF, or another graph backend.
 
+## 2026-06-04: Upgrade from concept demo to deployable AI stack
+
+Added Docker Compose with Postgres/pgvector and Neo4j so the project demonstrates a real local RAG and graph database workflow instead of only static sample data.
+
+## 2026-06-04: Use deterministic local embeddings for offline demo
+
+The RAG implementation uses a small deterministic embedding function so the demo can run without external API keys. The embedding module is isolated so it can be swapped for OpenAI, Bedrock, or another provider later.
+
+## 2026-06-04: Keep graph traversal in repository layer
+
+Neo4j Cypher queries live under `lib/graph/` and API routes call repository functions. This keeps room for an AWS Neptune adapter without rewriting UI or RAG orchestration.

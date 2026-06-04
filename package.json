@@ -4,20 +4,29 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "start": "next start",
     "build": "next build",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:seed": "tsx scripts/seed-postgres.ts && tsx scripts/seed-neo4j.ts",
+    "db:seed:postgres": "tsx scripts/seed-postgres.ts",
+    "db:seed:neo4j": "tsx scripts/seed-neo4j.ts"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",
+    "neo4j-driver": "^5.28.0",
     "next": "^16.2.7",
+    "pg": "^8.16.3",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
+    "@types/pg": "^8.15.6",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   },

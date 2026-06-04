@@ -31,6 +31,34 @@ Graph retrieval and reasoning
 Portfolio decisions, alerts, and evidence-backed answers
 ```
 
+## Local Runtime
+
+```text
+Next.js app
+  |-- /api/rag
+  |     |-- embeds question locally
+  |     |-- queries Postgres document_chunks with pgvector
+  |     '-- traverses Neo4j tenant impact graph
+  |
+  |-- /api/graph/impact
+  |     '-- runs Cypher tenant-space-lease-obligation traversal
+  |
+  '-- /api/health
+        |-- checks Postgres seeded chunk count
+        '-- checks Neo4j graph counts
+
+Postgres + pgvector
+  |-- source_documents
+  |-- document_chunks
+  |-- extraction_events
+  '-- entity_resolution_candidates
+
+Neo4j
+  |-- Asset, Building, Floor, Space
+  |-- Tenant, Lease, Amendment
+  '-- Permit, Obligation
+```
+
 ## Core Graph Concepts
 
 - `Asset`: A portfolio-level property or industrial campus.
@@ -63,3 +91,12 @@ The demo is shaped for hybrid retrieval:
 - Graph traversal expands through related tenants, spaces, leases, and obligations.
 - The answer layer cites both graph facts and source evidence.
 
+The current local implementation uses deterministic embeddings so the system runs without an external AI API key. A production implementation can replace `lib/rag/embedding.ts` with OpenAI, Bedrock, or another embedding provider without changing the database or graph repository boundaries.
+
+## Deployment Strategy
+
+- Local: Docker Compose runs the app, Postgres/pgvector, and Neo4j.
+- AWS app tier: ECS Fargate or App Runner runs the Docker image.
+- AWS vector tier: RDS PostgreSQL with `pgvector`.
+- AWS graph tier: Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with an adapter for openCypher queries.
+- Operations: Secrets Manager, CloudWatch logs, health endpoints, and IaC-managed environment variables.
