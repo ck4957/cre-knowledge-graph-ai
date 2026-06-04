@@ -16,7 +16,7 @@ Next.js container
   |-- /api/graph/impact
   '-- /api/health
   |
-  |-- RDS PostgreSQL with pgvector
+  |-- RDS PostgreSQL
   '-- Graph database
         |-- Preferred fast portfolio path: Neo4j Aura or Neo4j on ECS/EC2
         '-- AWS-native path: Amazon Neptune with an openCypher repository adapter
@@ -46,13 +46,13 @@ docker tag cre-knowledge-graph-ai:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.am
 docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/cre-knowledge-graph-ai:latest"
 ```
 
-2. Provision RDS PostgreSQL and enable pgvector.
+2. Provision RDS PostgreSQL.
 
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
+Run TypeORM migrations and seed data with `DATABASE_URL` pointed at RDS:
+
+```bash
+npm run db:seed:postgres
 ```
-
-Apply `db/init/001_schema.sql`, then run `npm run db:seed:postgres` with `DATABASE_URL` pointed at RDS.
 
 3. Provision graph storage.
 

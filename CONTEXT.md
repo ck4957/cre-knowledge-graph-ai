@@ -26,7 +26,7 @@ This version is a local Next.js app with:
 - Entity resolution scoring helper
 - Temporal active-state helper
 - Architecture and memory docs
-- Postgres/pgvector schema for documents and vector search
+- Postgres schema for documents, chunks, embeddings, and extraction metadata
 - Neo4j seed path for graph traversal
 - API routes for health, RAG, and graph impact analysis
 - Docker Compose local stack

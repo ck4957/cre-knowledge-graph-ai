@@ -18,7 +18,15 @@ The first implementation uses typed sample graph data rather than a database. Th
 
 ## 2026-06-04: Upgrade from concept demo to deployable AI stack
 
-Added Docker Compose with Postgres/pgvector and Neo4j so the project demonstrates a real local RAG and graph database workflow instead of only static sample data.
+Added Docker Compose with Postgres and Neo4j so the project demonstrates a real local RAG and graph database workflow instead of only static sample data.
+
+## 2026-06-04: Move schema ownership to TypeORM migrations
+
+Replaced direct init SQL and application SQL calls with TypeORM entities, migrations, repositories, and seed services. This makes database deployment versioned, readable, and testable.
+
+## 2026-06-04: Add connector boundaries for real data ingestion
+
+Added RESO/IDX, Google Maps, and PDF parser adapters plus ingestion API routes. These keep external data source details isolated from document persistence and RAG retrieval.
 
 ## 2026-06-04: Use deterministic local embeddings for offline demo
 

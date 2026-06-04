@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getNeo4jDriver } from "@/lib/db/neo4j";
-import { getPostgresPool } from "@/lib/db/postgres";
 import { getRuntimeEnv } from "@/lib/db/env";
+import { getAppDataSource } from "@/lib/db/typeorm";
 import { getTenantImpact } from "@/lib/graph/neo4j-repository";
 import { buildGraphAugmentedAnswer, detectTenantName } from "@/lib/rag/answer";
-import { retrieveFromLocalCorpus, retrieveFromPostgres } from "@/lib/rag/retriever";
+import { retrieveFromDatabase, retrieveFromLocalCorpus } from "@/lib/rag/retriever";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const tenantName = detectTenantName(body.question);
 
   try {
-    const citations = await retrieveFromPostgres(getPostgresPool(), body.question, env.RAG_TOP_K);
+    const citations = await retrieveFromDatabase(await getAppDataSource(), body.question, env.RAG_TOP_K);
     const graphFacts = await getTenantImpact(getNeo4jDriver(), tenantName);
 
     return NextResponse.json(buildGraphAugmentedAnswer(body.question, citations, graphFacts, "database"));
@@ -32,4 +32,3 @@ export async function POST(request: Request) {
     });
   }
 }
-

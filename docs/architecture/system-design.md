@@ -11,6 +11,8 @@ Source systems
   |-- Lease PDFs
   |-- Amendments
   |-- Permits
+  |-- RESO/IDX MLS feeds
+  |-- Google Maps geocoding
   |-- Property management records
   |-- Financial systems
   |-- Tenant coordination notes
@@ -37,17 +39,23 @@ Portfolio decisions, alerts, and evidence-backed answers
 Next.js app
   |-- /api/rag
   |     |-- embeds question locally
-  |     |-- queries Postgres document_chunks with pgvector
+  |     |-- loads persisted document embeddings through TypeORM repositories
   |     '-- traverses Neo4j tenant impact graph
   |
   |-- /api/graph/impact
   |     '-- runs Cypher tenant-space-lease-obligation traversal
   |
+  |-- /api/documents
+  |     '-- full CRUD for source documents and embedded chunks
+  |
+  |-- /api/ingest/mls and /api/ingest/pdf
+  |     '-- external source ingestion into the document repository
+  |
   '-- /api/health
         |-- checks Postgres seeded chunk count
         '-- checks Neo4j graph counts
 
-Postgres + pgvector
+Postgres + TypeORM
   |-- source_documents
   |-- document_chunks
   |-- extraction_events
@@ -95,8 +103,8 @@ The current local implementation uses deterministic embeddings so the system run
 
 ## Deployment Strategy
 
-- Local: Docker Compose runs the app, Postgres/pgvector, and Neo4j.
+- Local: Docker Compose runs the app, Postgres, and Neo4j.
 - AWS app tier: ECS Fargate or App Runner runs the Docker image.
-- AWS vector tier: RDS PostgreSQL with `pgvector`.
+- AWS relational tier: RDS PostgreSQL for documents, embeddings, extraction events, and entity resolution candidates.
 - AWS graph tier: Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with an adapter for openCypher queries.
 - Operations: Secrets Manager, CloudWatch logs, health endpoints, and IaC-managed environment variables.

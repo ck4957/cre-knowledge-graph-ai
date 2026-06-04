@@ -77,6 +77,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Postgres, Neo4j, and GraphRAG APIs
+      - name: Verify Postgres, Neo4j, GraphRAG, and CRUD APIs
         run: npm run stack:verify
+        env:
+          STACK_VERIFY_TEARDOWN: "1"
 
+      - name: Teardown Docker stack
+        if: always()
+        run: docker compose down -v

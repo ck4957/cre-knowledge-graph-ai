@@ -15,7 +15,7 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Starting Postgres/pgvector and Neo4j..."
+echo "Starting Postgres and Neo4j..."
 docker compose up -d postgres neo4j
 
 echo "Waiting for Postgres..."
@@ -44,6 +44,9 @@ npx next dev -p "${APP_PORT}" >/tmp/cre-kg-next-verify.log 2>&1 &
 APP_PID="$!"
 cleanup() {
   kill "${APP_PID}" >/dev/null 2>&1 || true
+  if [ "${STACK_VERIFY_TEARDOWN:-0}" = "1" ]; then
+    docker compose down -v
+  fi
 }
 trap cleanup EXIT
 
@@ -96,5 +99,52 @@ if (!payload.facts[0].obligation) {
 }
 ' "${GRAPH_JSON}"
 
-echo "Local AI stack verified: Postgres/pgvector + Neo4j + GraphRAG APIs are live."
+echo "Verifying full document CRUD endpoints..."
+CREATE_JSON="$(curl -fsS -X POST "${BASE_URL}/api/documents" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id":"e2e-doc",
+    "title":"E2E Lease Abstract",
+    "sourceType":"e2e_test",
+    "chunks":[
+      {
+        "id":"e2e-doc-chunk-0",
+        "content":"E2E test lease abstract for Northstar Logistics covering Space 110 CAM obligations.",
+        "entityRefs":["tenant-northstar","space-110"]
+      }
+    ]
+  }')"
+node -e '
+const payload = JSON.parse(process.argv[1]);
+if (payload.document?.id !== "e2e-doc" || payload.document.chunks?.length !== 1) {
+  throw new Error(`Create document failed: ${JSON.stringify(payload)}`);
+}
+' "${CREATE_JSON}"
 
+READ_JSON="$(curl -fsS "${BASE_URL}/api/documents/e2e-doc")"
+node -e '
+const payload = JSON.parse(process.argv[1]);
+if (payload.document?.title !== "E2E Lease Abstract") {
+  throw new Error(`Read document failed: ${JSON.stringify(payload)}`);
+}
+' "${READ_JSON}"
+
+PATCH_JSON="$(curl -fsS -X PATCH "${BASE_URL}/api/documents/e2e-doc" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"E2E Lease Abstract Updated"}')"
+node -e '
+const payload = JSON.parse(process.argv[1]);
+if (payload.document?.title !== "E2E Lease Abstract Updated") {
+  throw new Error(`Update document failed: ${JSON.stringify(payload)}`);
+}
+' "${PATCH_JSON}"
+
+DELETE_JSON="$(curl -fsS -X DELETE "${BASE_URL}/api/documents/e2e-doc")"
+node -e '
+const payload = JSON.parse(process.argv[1]);
+if (payload.deleted !== true) {
+  throw new Error(`Delete document failed: ${JSON.stringify(payload)}`);
+}
+' "${DELETE_JSON}"
+
+echo "Local AI stack verified: Postgres + Neo4j + GraphRAG + CRUD APIs are live."

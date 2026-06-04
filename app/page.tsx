@@ -37,8 +37,8 @@ const relationshipHighlights = activeRelationships(new Date("2026-06-03"));
 const systemLayers = [
   {
     icon: <Database size={19} />,
-    title: "Postgres + pgvector",
-    text: "Stores source documents, extraction events, entity-resolution candidates, and vector embeddings for retrieval."
+    title: "Postgres + TypeORM",
+    text: "Stores source documents, chunks, extraction events, entity-resolution candidates, and embeddings behind repositories."
   },
   {
     icon: <GitBranch size={19} />,
@@ -53,7 +53,7 @@ const systemLayers = [
   {
     icon: <Cloud size={19} />,
     title: "AWS-ready topology",
-    text: "Containerized app can deploy to ECS/App Runner with RDS PostgreSQL and a managed or containerized graph layer."
+    text: "Containerized app can deploy to ECS/App Runner with RDS PostgreSQL, migrations, and a managed graph layer."
   }
 ];
 
@@ -72,6 +72,21 @@ const apiExamples = [
     method: "GET",
     path: "/api/graph/impact?tenant=Northstar%20Logistics",
     text: "Returns tenant-space-lease-amendment-obligation paths from Neo4j."
+  },
+  {
+    method: "CRUD",
+    path: "/api/documents",
+    text: "Creates, reads, updates, and deletes source documents and embedded chunks through TypeORM repositories."
+  },
+  {
+    method: "POST",
+    path: "/api/ingest/mls",
+    text: "Pulls RESO/IDX listings, optionally geocodes addresses with Google Maps, and stores them as searchable chunks."
+  },
+  {
+    method: "POST",
+    path: "/api/ingest/pdf",
+    text: "Parses uploaded PDFs and ingests the extracted text into the RAG document store."
   }
 ];
 
@@ -238,8 +253,8 @@ export default function Home() {
             <div>
               <h3>RAG flow under the hood</h3>
               <ol className="pipeline-list">
-                <li>Lease, amendment, and permit chunks are embedded and stored in `document_chunks.embedding`.</li>
-                <li>`/api/rag` embeds the question and ranks chunks with pgvector cosine distance.</li>
+                <li>Lease, amendment, and permit chunks are embedded and stored through TypeORM migrations.</li>
+                <li>`/api/rag` embeds the question and ranks persisted chunks with a testable retrieval service.</li>
                 <li>The detected tenant is sent to Neo4j for lease, amendment, obligation, permit, and space traversal.</li>
                 <li>The response returns answer text, citations, graph facts, and whether it used live databases.</li>
               </ol>

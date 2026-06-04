@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildGraphAugmentedAnswer } from "@/lib/rag/answer";
 import { embedText, vectorLiteral } from "@/lib/rag/embedding";
-import { retrieveFromLocalCorpus } from "@/lib/rag/retriever";
+import { rankChunks, retrieveFromLocalCorpus } from "@/lib/rag/retriever";
 
 describe("local RAG retrieval", () => {
   it("retrieves CAM amendment evidence for obligation questions", () => {
@@ -21,7 +21,7 @@ describe("local RAG retrieval", () => {
 });
 
 describe("embedding utilities", () => {
-  it("produces pgvector-compatible literals", () => {
+  it("produces stable vector literals for diagnostics", () => {
     const literal = vectorLiteral(embedText("lease tenant space obligation"));
 
     expect(literal).toMatch(/^\[[\d.,-]+\]$/);
@@ -29,3 +29,32 @@ describe("embedding utilities", () => {
   });
 });
 
+describe("rankChunks", () => {
+  it("ranks persisted chunk embeddings without database-specific SQL", () => {
+    const query = embedText("CAM obligation");
+    const ranked = rankChunks(
+      [
+        {
+          id: "a",
+          documentId: "doc-a",
+          title: "Assignment",
+          content: "Assignment rights",
+          entityRefs: [],
+          embedding: embedText("assignment sublease consent")
+        },
+        {
+          id: "b",
+          documentId: "doc-b",
+          title: "CAM",
+          content: "CAM true-up obligation",
+          entityRefs: ["obligation-cam"],
+          embedding: embedText("CAM true-up obligation")
+        }
+      ],
+      query,
+      1
+    );
+
+    expect(ranked[0].id).toBe("b");
+  });
+});

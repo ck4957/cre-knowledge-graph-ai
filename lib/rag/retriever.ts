@@ -1,4 +1,6 @@
-import type { Pool } from "pg";
+import type { DataSource } from "typeorm";
+import { DocumentChunkEntity } from "@/lib/db/entities/document-chunk.entity";
+import { SourceDocumentEntity } from "@/lib/db/entities/source-document.entity";
 import { corpusDocuments } from "./corpus";
 import { cosineSimilarity, embedText, vectorLiteral } from "./embedding";
 
@@ -11,40 +13,25 @@ export type RetrievedChunk = {
   score: number;
 };
 
-export async function retrieveFromPostgres(pool: Pool, question: string, topK: number): Promise<RetrievedChunk[]> {
-  const embedding = vectorLiteral(embedText(question));
-  const result = await pool.query<{
-    id: string;
-    document_id: string;
-    title: string;
-    content: string;
-    entity_refs: string[];
-    score: string;
-  }>(
-    `
-    SELECT
-      c.id,
-      c.document_id,
-      d.title,
-      c.content,
-      c.entity_refs,
-      1 - (c.embedding <=> $1::vector) AS score
-    FROM document_chunks c
-    JOIN source_documents d ON d.id = c.document_id
-    ORDER BY c.embedding <=> $1::vector
-    LIMIT $2
-    `,
-    [embedding, topK]
-  );
+export async function retrieveFromDatabase(dataSource: DataSource, question: string, topK: number): Promise<RetrievedChunk[]> {
+  const queryEmbedding = embedText(question);
+  const chunks = await dataSource.getRepository(DocumentChunkEntity).find();
+  const documentIds = [...new Set(chunks.map((chunk) => chunk.documentId))];
+  const documents = await dataSource.getRepository(SourceDocumentEntity).findBy(documentIds.map((id) => ({ id })));
+  const documentTitles = new Map(documents.map((document) => [document.id, document.title]));
 
-  return result.rows.map((row) => ({
-    id: row.id,
-    documentId: row.document_id,
-    title: row.title,
-    content: row.content,
-    entityRefs: row.entity_refs,
-    score: Number(row.score)
-  }));
+  return rankChunks(
+    chunks.map((chunk) => ({
+      id: chunk.id,
+      documentId: chunk.documentId,
+      title: documentTitles.get(chunk.documentId) ?? chunk.documentId,
+      content: chunk.content,
+      entityRefs: chunk.entityRefs,
+      embedding: chunk.embedding
+    })),
+    queryEmbedding,
+    topK
+  );
 }
 
 export function retrieveFromLocalCorpus(question: string, topK: number): RetrievedChunk[] {
@@ -65,3 +52,16 @@ export function retrieveFromLocalCorpus(question: string, topK: number): Retriev
     .slice(0, topK);
 }
 
+export function rankChunks(
+  chunks: Array<Omit<RetrievedChunk, "score"> & { embedding: number[] }>,
+  queryEmbedding: number[],
+  topK: number
+): RetrievedChunk[] {
+  return chunks
+    .map(({ embedding, ...chunk }) => ({
+      ...chunk,
+      score: cosineSimilarity(queryEmbedding, embedding)
+    }))
+    .sort((left, right) => right.score - left.score)
+    .slice(0, topK);
+}

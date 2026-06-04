@@ -14,14 +14,14 @@ This repository is a portfolio demo for a CRE knowledge graph and AI reasoning l
 
 - TypeScript first.
 - Keep domain logic in `lib/` and UI composition in `app/`.
-- Keep local infrastructure in `docker-compose.yml`, `db/init/`, and `scripts/`.
+- Keep local infrastructure in `docker-compose.yml`, TypeORM migrations, and `scripts/`.
 - Keep cloud deployment guidance in `infra/aws/`.
 - Add focused tests for scoring, temporal, and graph reasoning helpers.
 - Prefer provider-neutral repository interfaces when adding cloud graph/database adapters.
 
 ## Local Stack
 
-- Postgres with pgvector stores documents, chunks, embeddings, extraction events, and entity-resolution candidates.
+- Postgres stores documents, chunks, embeddings, extraction events, and entity-resolution candidates through TypeORM entities and migrations.
 - Neo4j stores the property context graph and supports impact traversal.
 - Seed scripts must remain idempotent.
 - API routes should fall back to in-memory retrieval only when local databases are unavailable, and should report that mode.
