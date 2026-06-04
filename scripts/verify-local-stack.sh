@@ -39,8 +39,11 @@ docker compose exec -T neo4j cypher-shell -u neo4j -p landmark-demo-password "RE
 echo "Seeding databases..."
 npm run db:seed
 
-echo "Starting Next.js on ${BASE_URL}..."
-npx next dev -p "${APP_PORT}" >/tmp/cre-kg-next-verify.log 2>&1 &
+echo "Building Next.js for verification..."
+npx next build >/tmp/cre-kg-next-verify.log 2>&1
+
+echo "Starting Next.js production server on ${BASE_URL}..."
+npx next start -p "${APP_PORT}" >>/tmp/cre-kg-next-verify.log 2>&1 &
 APP_PID="$!"
 cleanup() {
   kill "${APP_PID}" >/dev/null 2>&1 || true

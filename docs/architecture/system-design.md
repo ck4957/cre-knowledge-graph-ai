@@ -107,7 +107,7 @@ The current local implementation uses deterministic embeddings so the system run
 ## Deployment Strategy
 
 - Local: Docker Compose runs the app, Postgres, and Neo4j.
-- AWS app tier: ECS Fargate or App Runner runs the Docker image.
-- AWS relational tier: RDS PostgreSQL for documents, embeddings, extraction events, and entity resolution candidates.
+- AWS app tier: ECS Fargate runs the Docker image behind an Application Load Balancer.
+- AWS relational tier: Terraform provisions RDS PostgreSQL, a generated database password, and the `DATABASE_URL` secret for documents, embeddings, extraction events, and entity resolution candidates.
 - AWS graph tier: Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with an adapter for openCypher queries.
-- Operations: Secrets Manager, CloudWatch logs, health endpoints, and IaC-managed environment variables.
+- Operations: ECS includes a one-shot seed task definition for TypeORM migrations plus Postgres and Neo4j seed data, with Secrets Manager, CloudWatch logs, health endpoints, and IaC-managed environment variables.

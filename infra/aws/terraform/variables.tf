@@ -15,9 +15,19 @@ variable "vpc_id" {
   description = "VPC id for the ECS service security group."
 }
 
-variable "subnet_ids" {
+variable "public_subnet_ids" {
   type        = list(string)
-  description = "Subnet ids for the ECS Fargate service."
+  description = "Public subnet ids for the application load balancer."
+}
+
+variable "app_subnet_ids" {
+  type        = list(string)
+  description = "Subnet ids for the ECS Fargate service. Public subnets are acceptable for the demo; private subnets with NAT are preferred for production."
+}
+
+variable "database_subnet_ids" {
+  type        = list(string)
+  description = "Private subnet ids for the RDS PostgreSQL subnet group."
 }
 
 variable "allowed_ingress_cidrs" {
@@ -28,7 +38,8 @@ variable "allowed_ingress_cidrs" {
 
 variable "database_url_secret_arn" {
   type        = string
-  description = "Secrets Manager ARN containing DATABASE_URL."
+  description = "Optional Secrets Manager ARN to use for DATABASE_URL instead of the Terraform-managed RDS secret. RDS is still provisioned by this module."
+  default     = ""
 }
 
 variable "neo4j_password_secret_arn" {
@@ -71,3 +82,44 @@ variable "desired_count" {
   default     = 1
 }
 
+variable "postgres_engine_version" {
+  type        = string
+  description = "RDS PostgreSQL engine version."
+  default     = "16.6"
+}
+
+variable "database_instance_class" {
+  type        = string
+  description = "RDS PostgreSQL instance class."
+  default     = "db.t4g.micro"
+}
+
+variable "database_allocated_storage" {
+  type        = number
+  description = "Allocated RDS storage in GiB."
+  default     = 20
+}
+
+variable "database_deletion_protection" {
+  type        = bool
+  description = "Protect the RDS instance from accidental deletion."
+  default     = true
+}
+
+variable "database_skip_final_snapshot" {
+  type        = bool
+  description = "Skip final RDS snapshots on destroy. Keep false for production, true for ephemeral CI/demo stacks."
+  default     = false
+}
+
+variable "seed_task_cpu" {
+  type        = number
+  description = "Fargate CPU units for the one-shot migration and seed task."
+  default     = 512
+}
+
+variable "seed_task_memory" {
+  type        = number
+  description = "Fargate memory in MiB for the one-shot migration and seed task."
+  default     = 1024
+}

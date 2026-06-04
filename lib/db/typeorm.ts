@@ -1,11 +1,10 @@
 import "reflect-metadata";
-import ormDataSource from "@/ormconfig";
+import { appDataSource } from "@/lib/db/app-data-source";
 
 export async function getAppDataSource() {
-  if (!ormDataSource.isInitialized) {
-    await ormDataSource.initialize();
+  if (!appDataSource.isInitialized) {
+    await appDataSource.initialize();
   }
 
-  return ormDataSource;
+  return appDataSource;
 }
-

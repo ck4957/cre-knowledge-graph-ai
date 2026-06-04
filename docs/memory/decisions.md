@@ -39,3 +39,7 @@ The RAG implementation uses a small deterministic embedding function so the demo
 ## 2026-06-04: Keep graph traversal in repository layer
 
 Neo4j Cypher queries live under `lib/graph/` and API routes call repository functions. This keeps room for an AWS Neptune adapter without rewriting UI or RAG orchestration.
+
+## 2026-06-04: Make AWS deployability concrete
+
+Expanded Terraform from an ECS-only scaffold into an ALB + ECS Fargate + RDS PostgreSQL stack with generated database credentials, Secrets Manager wiring, CloudWatch logs, restricted security groups, and a one-shot seed task definition for TypeORM migrations plus RAG/graph seed data.

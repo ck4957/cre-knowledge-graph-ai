@@ -154,8 +154,8 @@ The app starts with an industrial property context graph and financial command c
 
 See `infra/aws/README.md` for a deployable target architecture using:
 
-- ECS Fargate or App Runner for the Next.js container
-- RDS PostgreSQL for documents, extraction events, and embeddings
+- ECS Fargate behind an Application Load Balancer for the Next.js container
+- Terraform-managed RDS PostgreSQL for documents, extraction events, and embeddings
 - Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with a repository adapter
 - Secrets Manager for database credentials
-- CloudWatch logs and alarms
+- CloudWatch logs, health checks, and a one-shot ECS migration/seed task definition
