@@ -28,6 +28,10 @@ Replaced direct init SQL and application SQL calls with TypeORM entities, migrat
 
 Added RESO/IDX, Google Maps, and PDF parser adapters plus ingestion API routes. These keep external data source details isolated from document persistence and RAG retrieval.
 
+## 2026-06-04: Add financial command center
+
+Added typed financial analytics, a dashboard API, and line/bar visualizations for rent, NOI, occupancy, lease rollover, expense mix, and CAM exposure so the product reads like an owner/operator system rather than only a graph demo.
+
 ## 2026-06-04: Use deterministic local embeddings for offline demo
 
 The RAG implementation uses a small deterministic embedding function so the demo can run without external API keys. The embedding module is isolated so it can be swapped for OpenAI, Bedrock, or another provider later.

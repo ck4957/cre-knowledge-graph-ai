@@ -1,6 +1,8 @@
 import {
   AlertTriangle,
   ArrowRight,
+  Banknote,
+  BarChart3,
   Brain,
   Building2,
   CheckCircle2,
@@ -10,12 +12,20 @@ import {
   FileText,
   GitBranch,
   Layers3,
+  LineChart,
   Network,
+  Percent,
   Scale,
   Search,
   Server,
   ShieldCheck
 } from "lucide-react";
+import {
+  buildFinancialDashboard,
+  calculateNoiSeries,
+  calculateOccupancySeries,
+  calculateRentSeries
+} from "@/lib/financial/analytics";
 import { activeRelationships, graphEdges, graphNodes, leaseExtractionExample } from "@/lib/graph/sample-data";
 import { isActive } from "@/lib/temporal/is-active";
 import { trustBand } from "@/lib/trust/trust-band";
@@ -94,6 +104,10 @@ export default function Home() {
   const activeLeaseCount = graphEdges.filter((edge) => edge.type === "LEASES" && isActive(edge, new Date("2026-06-03"))).length;
   const highTrustFacts = graphEdges.filter((edge) => trustBand(edge.confidence) === "high").length;
   const extractionConfidence = Math.round(leaseExtractionExample.confidence * 100);
+  const financialDashboard = buildFinancialDashboard();
+  const rentSeries = calculateRentSeries(financialDashboard.monthly);
+  const noiSeries = calculateNoiSeries(financialDashboard.monthly);
+  const occupancySeries = calculateOccupancySeries(financialDashboard.monthly);
 
   return (
     <div className="shell">
@@ -224,6 +238,89 @@ export default function Home() {
           </aside>
         </section>
 
+        <section className="platform-section" aria-label="Financial asset dashboard">
+          <div className="section-heading">
+            <div>
+              <h2>Portfolio financial command center</h2>
+              <p>
+                Owners can track rent growth, NOI, occupancy, expense pressure, CAM recovery exposure, and lease
+                rollover risk from the same lease intelligence layer.
+              </p>
+            </div>
+            <div className="status-pill">
+              <BarChart3 size={17} />
+              Finance dashboard
+            </div>
+          </div>
+
+          <div className="finance-kpi-grid">
+            <Metric icon={<Banknote size={18} />} label="Monthly rent" value={formatCurrency(financialDashboard.kpis.grossRent)} />
+            <Metric icon={<LineChart size={18} />} label="NOI" value={formatCurrency(financialDashboard.kpis.netOperatingIncome)} />
+            <Metric icon={<Percent size={18} />} label="Occupancy" value={formatPercent(financialDashboard.kpis.occupancyRate)} />
+            <Metric icon={<Scale size={18} />} label="Expense ratio" value={formatPercent(financialDashboard.kpis.expenseRatio)} />
+          </div>
+
+          <div className="chart-grid">
+            <ChartPanel
+              title="Rent and NOI trend"
+              subtitle="Monthly gross rent vs. net operating income"
+              legend={[
+                { label: "Gross rent", color: "#27637a" },
+                { label: "NOI", color: "#2f7d57" }
+              ]}
+            >
+              <LineChartSvg
+                series={[
+                  { label: "Gross rent", color: "#27637a", points: rentSeries },
+                  { label: "NOI", color: "#2f7d57", points: noiSeries }
+                ]}
+                valueFormatter={formatCompactCurrency}
+              />
+            </ChartPanel>
+
+            <ChartPanel title="Occupancy trend" subtitle="Physical occupancy by month" legend={[{ label: "Occupancy", color: "#b47a2c" }]}>
+              <LineChartSvg
+                series={[{ label: "Occupancy", color: "#b47a2c", points: occupancySeries }]}
+                valueFormatter={(value) => `${Math.round(value)}%`}
+              />
+            </ChartPanel>
+
+            <ChartPanel title="Lease rollover risk" subtitle="Expiring rent by term bucket">
+              <BarChartSvg
+                bars={financialDashboard.leaseExpirations.map((bucket) => ({
+                  label: bucket.label,
+                  value: bucket.expiringRent,
+                  note: `${bucket.leases} leases`
+                }))}
+                color="#27637a"
+                valueFormatter={formatCompactCurrency}
+              />
+            </ChartPanel>
+
+            <ChartPanel title="Expense mix" subtitle="Operating expense categories">
+              <BarChartSvg
+                bars={financialDashboard.expenseMix.map((expense) => ({
+                  label: expense.category,
+                  value: expense.amount
+                }))}
+                color="#a9493f"
+                valueFormatter={formatCompactCurrency}
+              />
+            </ChartPanel>
+
+            <ChartPanel title="CAM exposure" subtitle="Recoverable and owner-cost buckets">
+              <BarChartSvg
+                bars={financialDashboard.camExposure.map((expense) => ({
+                  label: expense.category,
+                  value: expense.amount
+                }))}
+                color="#2f7d57"
+                valueFormatter={formatCompactCurrency}
+              />
+            </ChartPanel>
+          </div>
+        </section>
+
         <section className="platform-section" aria-label="Deployable AI engineering system">
           <div className="section-heading">
             <div>
@@ -276,6 +373,143 @@ export default function Home() {
         </section>
       </main>
     </div>
+  );
+}
+
+function ChartPanel({
+  title,
+  subtitle,
+  legend,
+  children
+}: {
+  title: string;
+  subtitle: string;
+  legend?: Array<{ label: string; color: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <article className="chart-panel">
+      <div className="chart-header">
+        <div>
+          <h3>{title}</h3>
+          <p>{subtitle}</p>
+        </div>
+        {legend ? (
+          <div className="chart-legend">
+            {legend.map((item) => (
+              <span key={item.label}>
+                <i style={{ background: item.color }} />
+                {item.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      {children}
+    </article>
+  );
+}
+
+function LineChartSvg({
+  series,
+  valueFormatter
+}: {
+  series: Array<{ label: string; color: string; points: Array<{ label: string; value: number }> }>;
+  valueFormatter: (value: number) => string;
+}) {
+  const values = series.flatMap((item) => item.points.map((point) => point.value));
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const width = 640;
+  const height = 260;
+  const padding = { top: 22, right: 22, bottom: 38, left: 58 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const labels = series[0]?.points.map((point) => point.label) ?? [];
+
+  const xFor = (index: number) => padding.left + (labels.length <= 1 ? 0 : (index / (labels.length - 1)) * chartWidth);
+  const yFor = (value: number) => padding.top + chartHeight - ((value - min) / Math.max(1, max - min)) * chartHeight;
+
+  return (
+    <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Line chart">
+      <line className="axis-line" x1={padding.left} y1={padding.top} x2={padding.left} y2={height - padding.bottom} />
+      <line className="axis-line" x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} />
+      {[0, 0.5, 1].map((step) => {
+        const value = min + (max - min) * step;
+        const y = yFor(value);
+        return (
+          <g key={step}>
+            <line className="grid-line" x1={padding.left} y1={y} x2={width - padding.right} y2={y} />
+            <text className="chart-axis-label" x={8} y={y + 4}>
+              {valueFormatter(value)}
+            </text>
+          </g>
+        );
+      })}
+      {series.map((item) => {
+        const d = item.points.map((point, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(point.value)}`).join(" ");
+        return (
+          <g key={item.label}>
+            <path className="line-path" d={d} style={{ stroke: item.color }} />
+            {item.points.map((point, index) => (
+              <circle key={`${item.label}-${point.label}`} cx={xFor(index)} cy={yFor(point.value)} r="4" fill={item.color} />
+            ))}
+          </g>
+        );
+      })}
+      {labels.map((label, index) => (
+        <text key={label} className="chart-axis-label" x={xFor(index)} y={height - 12} textAnchor="middle">
+          {label}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+function BarChartSvg({
+  bars,
+  color,
+  valueFormatter
+}: {
+  bars: Array<{ label: string; value: number; note?: string }>;
+  color: string;
+  valueFormatter: (value: number) => string;
+}) {
+  const width = 640;
+  const height = 260;
+  const padding = { top: 20, right: 24, bottom: 56, left: 52 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const max = Math.max(...bars.map((bar) => bar.value));
+  const gap = 16;
+  const barWidth = (chartWidth - gap * (bars.length - 1)) / bars.length;
+
+  return (
+    <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Bar chart">
+      <line className="axis-line" x1={padding.left} y1={padding.top} x2={padding.left} y2={height - padding.bottom} />
+      <line className="axis-line" x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} />
+      {bars.map((bar, index) => {
+        const x = padding.left + index * (barWidth + gap);
+        const barHeight = (bar.value / Math.max(1, max)) * chartHeight;
+        const y = padding.top + chartHeight - barHeight;
+        return (
+          <g key={bar.label}>
+            <rect className="bar-rect" x={x} y={y} width={barWidth} height={barHeight} rx="5" style={{ fill: color }} />
+            <text className="bar-value" x={x + barWidth / 2} y={Math.max(14, y - 8)} textAnchor="middle">
+              {valueFormatter(bar.value)}
+            </text>
+            <text className="chart-axis-label" x={x + barWidth / 2} y={height - 32} textAnchor="middle">
+              {bar.label}
+            </text>
+            {bar.note ? (
+              <text className="chart-axis-label" x={x + barWidth / 2} y={height - 14} textAnchor="middle">
+                {bar.note}
+              </text>
+            ) : null}
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
@@ -339,4 +573,25 @@ function FeedItem({ icon, title, text }: { icon: React.ReactNode; title: string;
       <p>{text}</p>
     </li>
   );
+}
+
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+function formatCompactCurrency(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(value);
+}
+
+function formatPercent(value: number): string {
+  return `${Math.round(value * 100)}%`;
 }

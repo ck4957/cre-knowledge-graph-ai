@@ -17,6 +17,7 @@ The project models how fragmented CRE records, including leases, spaces, tenants
 - API routes for health checks, graph impact analysis, and graph-augmented RAG
 - CRUD APIs for source documents and chunks
 - Connector seams for RESO/IDX MLS feeds, PDF parsing, and Google Maps geocoding
+- Financial dashboard with KPI, line chart, and bar chart visualizations
 - AWS deployment blueprint for a containerized production path
 
 ## Tech Stack
@@ -74,6 +75,8 @@ curl -X POST http://localhost:3000/api/rag \
   -d '{"question":"What CAM obligation changed for Northstar?"}'
 
 curl "http://localhost:3000/api/graph/impact?tenant=Northstar%20Logistics"
+
+curl http://localhost:3000/api/financial/dashboard
 
 curl -X POST http://localhost:3000/api/documents \
   -H "Content-Type: application/json" \
@@ -145,7 +148,7 @@ tests/                       Focused domain tests
 
 ## Demo Narrative
 
-The app starts with an industrial property context graph. The sample graph connects a portfolio asset to a building, floor, space, tenant, lease, amendment, permit, and legal obligation. The local stack stores document chunks and embeddings in Postgres, stores graph facts in Neo4j, and answers questions by combining embedding retrieval with graph traversal.
+The app starts with an industrial property context graph and financial command center. The sample graph connects a portfolio asset to a building, floor, space, tenant, lease, amendment, permit, and legal obligation. The dashboard tracks rent, NOI, occupancy, expense mix, lease rollover risk, and CAM exposure. The local stack stores document chunks and embeddings in Postgres, stores graph facts in Neo4j, and answers questions by combining embedding retrieval with graph traversal.
 
 ## AWS Direction
 

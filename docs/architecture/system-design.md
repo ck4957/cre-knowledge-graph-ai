@@ -48,6 +48,9 @@ Next.js app
   |-- /api/documents
   |     '-- full CRUD for source documents and embedded chunks
   |
+  |-- /api/financial/dashboard
+  |     '-- KPI, NOI, occupancy, expense, rollover, and CAM metrics
+  |
   |-- /api/ingest/mls and /api/ingest/pdf
   |     '-- external source ingestion into the document repository
   |
