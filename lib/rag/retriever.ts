@@ -2,7 +2,7 @@ import type { DataSource } from "typeorm";
 import { DocumentChunkEntity } from "@/lib/db/entities/document-chunk.entity";
 import { SourceDocumentEntity } from "@/lib/db/entities/source-document.entity";
 import { corpusDocuments } from "./corpus";
-import { cosineSimilarity, embedText, vectorLiteral } from "./embedding";
+import { cosineSimilarity, embedText, embedTextAsync } from "./embedding";
 
 export type RetrievedChunk = {
   id: string;
@@ -14,7 +14,7 @@ export type RetrievedChunk = {
 };
 
 export async function retrieveFromDatabase(dataSource: DataSource, question: string, topK: number): Promise<RetrievedChunk[]> {
-  const queryEmbedding = embedText(question);
+  const queryEmbedding = await embedTextAsync(question);
   const chunks = await dataSource.getRepository(DocumentChunkEntity).find();
   const documentIds = [...new Set(chunks.map((chunk) => chunk.documentId))];
   const documents = await dataSource.getRepository(SourceDocumentEntity).findBy(documentIds.map((id) => ({ id })));

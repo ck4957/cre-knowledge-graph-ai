@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildGraphAugmentedAnswer } from "@/lib/rag/answer";
-import { embedText, vectorLiteral } from "@/lib/rag/embedding";
+import { createEmbeddingProvider, embedText, embedTextAsync, vectorLiteral } from "@/lib/rag/embedding";
 import { rankChunks, retrieveFromLocalCorpus } from "@/lib/rag/retriever";
 
 describe("local RAG retrieval", () => {
@@ -21,11 +21,49 @@ describe("local RAG retrieval", () => {
 });
 
 describe("embedding utilities", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("produces stable vector literals for diagnostics", () => {
     const literal = vectorLiteral(embedText("lease tenant space obligation"));
 
     expect(literal).toMatch(/^\[[\d.,-]+\]$/);
     expect(literal.split(",")).toHaveLength(8);
+  });
+
+  it("uses the deterministic async provider by default", async () => {
+    await expect(embedTextAsync("lease tenant space obligation")).resolves.toEqual(embedText("lease tenant space obligation"));
+  });
+
+  it("supports HTTP embedding providers with nested response paths", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            embedding: [3, 4]
+          }
+        ]
+      })
+    } as Response);
+    const provider = createEmbeddingProvider({
+      provider: "http",
+      apiUrl: "https://embeddings.example.test",
+      apiKey: "test-key",
+      model: "managed-embedding-model",
+      responsePath: "data.0.embedding"
+    });
+
+    await expect(provider.embed("CAM obligation")).resolves.toEqual([0.6, 0.8]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://embeddings.example.test",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ Authorization: "Bearer test-key" }),
+        body: JSON.stringify({ input: "CAM obligation", model: "managed-embedding-model" })
+      })
+    );
   });
 });
 

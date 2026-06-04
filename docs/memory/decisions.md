@@ -59,3 +59,7 @@ Added a dedicated Compose app verifier that builds and runs the production app c
 ## 2026-06-04: Add AWS operational deployment scripts
 
 Added scripts for pushing the container image to ECR, running the ECS migration/seed task, and verifying the deployed app endpoints. The AWS runbook now has executable steps instead of only descriptive commands.
+
+## 2026-06-04: Add provider-neutral embedding boundary
+
+Kept deterministic embeddings as the offline default, but moved database ingestion and database-backed retrieval onto an async provider boundary with an optional HTTP adapter. This lets production use managed embeddings while preserving local Docker and CI without external credentials.

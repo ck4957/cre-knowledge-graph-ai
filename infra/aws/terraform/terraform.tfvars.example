@@ -11,6 +11,13 @@ neo4j_password_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secre
 
 allowed_ingress_cidrs = ["0.0.0.0/0"]
 rag_top_k             = 4
+embedding_provider    = "deterministic"
+embedding_api_url     = ""
+embedding_model       = ""
+embedding_response_path = "embedding"
+
+# Set when embedding_provider = "http".
+embedding_api_key_secret_arn = ""
 
 # For ephemeral portfolio demo environments. Use the production-safe defaults
 # from variables.tf for long-lived environments.

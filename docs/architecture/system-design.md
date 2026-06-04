@@ -107,7 +107,7 @@ The demo is shaped for hybrid retrieval:
 - The lease administration workflow composes abstraction, critical dates, graph impacts, and recommended actions from the same retrieval path.
 - GraphRAG evals assert citation relevance, entity references, answer terms, graph facts, and database-backed mode for critical portfolio questions.
 
-The current local implementation uses deterministic embeddings so the system runs without an external AI API key. A production implementation can replace `lib/rag/embedding.ts` with OpenAI, Bedrock, or another embedding provider without changing the database or graph repository boundaries.
+The current local implementation uses deterministic embeddings so the system runs without an external AI API key. Database ingestion and retrieval go through an async provider boundary in `lib/rag/embedding.ts`; production can switch to an HTTP-managed embedding provider with `EMBEDDING_PROVIDER=http` without changing document repositories, RAG orchestration, or graph traversal.
 
 ## Deployment Strategy
 

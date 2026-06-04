@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { DocumentChunkEntity } from "@/lib/db/entities/document-chunk.entity";
 import { SourceDocumentEntity } from "@/lib/db/entities/source-document.entity";
-import { embedText } from "@/lib/rag/embedding";
+import { embedTextAsync } from "@/lib/rag/embedding";
 
 export type CreateSourceDocumentInput = {
   id: string;
@@ -46,18 +46,19 @@ export class DocumentRepository {
       });
 
       await documentRepository.save(document);
-      await chunkRepository.save(
-        input.chunks.map((chunk, index) =>
+      const chunkEntities = await Promise.all(
+        input.chunks.map(async (chunk, index) =>
           chunkRepository.create({
             id: chunk.id,
             documentId: input.id,
             chunkIndex: index,
             content: chunk.content,
             entityRefs: chunk.entityRefs ?? [],
-            embedding: embedText(chunk.content)
+            embedding: await embedTextAsync(chunk.content)
           })
         )
       );
+      await chunkRepository.save(chunkEntities);
 
       const created = await manager.getRepository(SourceDocumentEntity).findOneBy({ id: input.id });
       if (!created) {

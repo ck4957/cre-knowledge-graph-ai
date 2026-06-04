@@ -20,6 +20,7 @@ The project models how fragmented CRE records, including leases, spaces, tenants
 - Connector seams for RESO/IDX MLS feeds, PDF parsing, and Google Maps geocoding
 - Financial dashboard with KPI, line chart, and bar chart visualizations
 - Deterministic GraphRAG evals for citation relevance, graph grounding, and database-backed answer mode
+- Provider-neutral embedding adapter with deterministic local mode and optional managed HTTP provider
 - AWS deployment blueprint for a containerized production path
 
 ## Tech Stack
@@ -139,6 +140,20 @@ RESO_WEB_API_BASE_URL=...
 RESO_WEB_API_ACCESS_TOKEN=...
 GOOGLE_MAPS_API_KEY=...
 ```
+
+Embedding provider configuration:
+
+```bash
+EMBEDDING_PROVIDER=deterministic
+# or
+EMBEDDING_PROVIDER=http
+EMBEDDING_API_URL=https://your-embedding-service.example/v1/embeddings
+EMBEDDING_API_KEY=...
+EMBEDDING_MODEL=managed-embedding-model
+EMBEDDING_RESPONSE_PATH=data.0.embedding
+```
+
+The local demo defaults to deterministic embeddings so Docker and CI run without external credentials. Database ingestion and database-backed RAG use the async provider boundary, so production can point both chunk creation and query retrieval at the same managed embedding service.
 
 ## Project Structure
 

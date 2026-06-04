@@ -24,7 +24,55 @@ locals {
   database_username       = "creadmin"
   database_url            = "postgres://${local.database_username}:${random_password.database.result}@${aws_db_instance.postgres.address}:${aws_db_instance.postgres.port}/${local.database_name}"
   database_url_secret_arn = var.database_url_secret_arn != "" ? var.database_url_secret_arn : aws_secretsmanager_secret.database_url.arn
-  task_secret_arns        = compact([local.database_url_secret_arn, var.neo4j_password_secret_arn])
+  task_secret_arns        = compact([local.database_url_secret_arn, var.neo4j_password_secret_arn, var.embedding_api_key_secret_arn])
+  app_environment = [
+    {
+      name  = "NEO4J_URI"
+      value = var.neo4j_uri
+    },
+    {
+      name  = "NEO4J_USERNAME"
+      value = var.neo4j_username
+    },
+    {
+      name  = "RAG_TOP_K"
+      value = tostring(var.rag_top_k)
+    },
+    {
+      name  = "EMBEDDING_PROVIDER"
+      value = var.embedding_provider
+    },
+    {
+      name  = "EMBEDDING_API_URL"
+      value = var.embedding_api_url
+    },
+    {
+      name  = "EMBEDDING_MODEL"
+      value = var.embedding_model
+    },
+    {
+      name  = "EMBEDDING_RESPONSE_PATH"
+      value = var.embedding_response_path
+    }
+  ]
+  app_secrets = concat(
+    [
+      {
+        name      = "DATABASE_URL"
+        valueFrom = local.database_url_secret_arn
+      },
+      {
+        name      = "NEO4J_PASSWORD"
+        valueFrom = var.neo4j_password_secret_arn
+      }
+    ],
+    var.embedding_api_key_secret_arn != "" ? [
+      {
+        name      = "EMBEDDING_API_KEY"
+        valueFrom = var.embedding_api_key_secret_arn
+      }
+    ] : []
+  )
 }
 
 resource "aws_ecr_repository" "app" {
@@ -236,30 +284,8 @@ resource "aws_ecs_task_definition" "app" {
           protocol      = "tcp"
         }
       ]
-      environment = [
-        {
-          name  = "NEO4J_URI"
-          value = var.neo4j_uri
-        },
-        {
-          name  = "NEO4J_USERNAME"
-          value = var.neo4j_username
-        },
-        {
-          name  = "RAG_TOP_K"
-          value = tostring(var.rag_top_k)
-        }
-      ]
-      secrets = [
-        {
-          name      = "DATABASE_URL"
-          valueFrom = local.database_url_secret_arn
-        },
-        {
-          name      = "NEO4J_PASSWORD"
-          valueFrom = var.neo4j_password_secret_arn
-        }
-      ]
+      environment = local.app_environment
+      secrets     = local.app_secrets
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -284,30 +310,12 @@ resource "aws_ecs_task_definition" "seed" {
 
   container_definitions = jsonencode([
     {
-      name      = "seed"
-      image     = local.container_image
-      essential = true
-      command   = ["npm", "run", "db:seed"]
-      environment = [
-        {
-          name  = "NEO4J_URI"
-          value = var.neo4j_uri
-        },
-        {
-          name  = "NEO4J_USERNAME"
-          value = var.neo4j_username
-        }
-      ]
-      secrets = [
-        {
-          name      = "DATABASE_URL"
-          valueFrom = local.database_url_secret_arn
-        },
-        {
-          name      = "NEO4J_PASSWORD"
-          valueFrom = var.neo4j_password_secret_arn
-        }
-      ]
+      name        = "seed"
+      image       = local.container_image
+      essential   = true
+      command     = ["npm", "run", "db:seed"]
+      environment = local.app_environment
+      secrets     = local.app_secrets
       logConfiguration = {
         logDriver = "awslogs"
         options = {

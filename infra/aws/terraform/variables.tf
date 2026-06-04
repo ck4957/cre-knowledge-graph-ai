@@ -64,6 +64,36 @@ variable "rag_top_k" {
   default     = 4
 }
 
+variable "embedding_provider" {
+  type        = string
+  description = "Embedding provider for ECS tasks. Use deterministic for offline demos or http for a managed embedding endpoint."
+  default     = "deterministic"
+}
+
+variable "embedding_api_url" {
+  type        = string
+  description = "HTTP embedding provider endpoint. Required when embedding_provider is http."
+  default     = ""
+}
+
+variable "embedding_api_key_secret_arn" {
+  type        = string
+  description = "Optional Secrets Manager ARN containing EMBEDDING_API_KEY."
+  default     = ""
+}
+
+variable "embedding_model" {
+  type        = string
+  description = "Optional embedding model name sent to the HTTP embedding provider."
+  default     = ""
+}
+
+variable "embedding_response_path" {
+  type        = string
+  description = "Dot path to the embedding array in the HTTP provider response, for example embedding or data.0.embedding."
+  default     = "embedding"
+}
+
 variable "task_cpu" {
   type        = number
   description = "Fargate task CPU units."
