@@ -47,3 +47,7 @@ Expanded Terraform from an ECS-only scaffold into an ALB + ECS Fargate + RDS Pos
 ## 2026-06-04: Add deterministic GraphRAG evals
 
 Added eval cases for CAM obligations, permit impact, and renewal options. The eval harness checks citation terms, entity references, answer terms, graph facts, and database mode so CI can catch regressions where the product stops using lease evidence or the graph.
+
+## 2026-06-04: Add lease administration workflow orchestration
+
+Added a typed workflow service and API that composes reviewed lease extraction fields, RAG citations, Neo4j impact facts, critical dates, and recommended operating actions. The live Docker verifier now asserts this workflow runs in database mode.

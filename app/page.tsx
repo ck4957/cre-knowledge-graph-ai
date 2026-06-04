@@ -79,6 +79,11 @@ const apiExamples = [
     text: "Runs vector retrieval plus graph impact traversal for a CRE question."
   },
   {
+    method: "POST",
+    path: "/api/workflows/lease-administration",
+    text: "Builds a lease abstract, critical dates, graph impacts, citations, and operating actions."
+  },
+  {
     method: "GET",
     path: "/api/graph/impact?tenant=Northstar%20Logistics",
     text: "Returns tenant-space-lease-amendment-obligation paths from Neo4j."

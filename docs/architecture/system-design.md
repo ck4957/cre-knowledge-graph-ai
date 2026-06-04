@@ -45,6 +45,9 @@ Next.js app
   |-- /api/graph/impact
   |     '-- runs Cypher tenant-space-lease-obligation traversal
   |
+  |-- /api/workflows/lease-administration
+  |     '-- composes lease abstract, critical dates, citations, graph impacts, and actions
+  |
   |-- /api/documents
   |     '-- full CRUD for source documents and embedded chunks
   |
@@ -101,6 +104,7 @@ The demo is shaped for hybrid retrieval:
 - Vector retrieval finds semantically relevant document excerpts.
 - Graph traversal expands through related tenants, spaces, leases, and obligations.
 - The answer layer cites both graph facts and source evidence.
+- The lease administration workflow composes abstraction, critical dates, graph impacts, and recommended actions from the same retrieval path.
 - GraphRAG evals assert citation relevance, entity references, answer terms, graph facts, and database-backed mode for critical portfolio questions.
 
 The current local implementation uses deterministic embeddings so the system runs without an external AI API key. A production implementation can replace `lib/rag/embedding.ts` with OpenAI, Bedrock, or another embedding provider without changing the database or graph repository boundaries.

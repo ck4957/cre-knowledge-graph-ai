@@ -105,6 +105,27 @@ if (!payload.facts[0].obligation) {
 }
 ' "${GRAPH_JSON}"
 
+echo "Verifying lease administration workflow endpoint..."
+WORKFLOW_JSON="$(curl -fsS -X POST "${BASE_URL}/api/workflows/lease-administration" \
+  -H "Content-Type: application/json" \
+  -d "{\"question\":\"What lease administration work is needed for Northstar?\"}")"
+node -e '
+const payload = JSON.parse(process.argv[1]);
+const workflow = payload.workflow;
+if (workflow?.mode !== "database") {
+  throw new Error(`Expected database workflow mode, received ${workflow?.mode}: ${payload.warning ?? ""}`);
+}
+if (!workflow.citations?.length || !workflow.impacts?.length) {
+  throw new Error(`Expected citations and graph impacts: ${JSON.stringify(workflow)}`);
+}
+if (!workflow.criticalDates?.some((date) => date.label === "Renewal notice deadline")) {
+  throw new Error(`Expected renewal notice critical date: ${JSON.stringify(workflow.criticalDates)}`);
+}
+if (!workflow.actions?.some((action) => action.label === "Review CAM reconciliation package")) {
+  throw new Error(`Expected CAM workflow action: ${JSON.stringify(workflow.actions)}`);
+}
+' "${WORKFLOW_JSON}"
+
 echo "Verifying full document CRUD endpoints..."
 CREATE_JSON="$(curl -fsS -X POST "${BASE_URL}/api/documents" \
   -H "Content-Type: application/json" \
