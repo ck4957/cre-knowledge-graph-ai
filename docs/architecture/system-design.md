@@ -111,7 +111,7 @@ The current local implementation uses deterministic embeddings so the system run
 
 ## Deployment Strategy
 
-- Local: Docker Compose runs the app, Postgres, and Neo4j.
+- Local: Docker Compose runs the app, one-shot seed task, Postgres, and Neo4j; `npm run compose:verify` validates the fully containerized path.
 - AWS app tier: ECS Fargate runs the Docker image behind an Application Load Balancer.
 - AWS relational tier: Terraform provisions RDS PostgreSQL, a generated database password, and the `DATABASE_URL` secret for documents, embeddings, extraction events, and entity resolution candidates.
 - AWS graph tier: Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with an adapter for openCypher queries.

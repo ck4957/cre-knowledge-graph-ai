@@ -15,7 +15,8 @@
     "db:seed": "npm run db:migrate && tsx scripts/seed-postgres.ts && tsx scripts/seed-neo4j.ts",
     "db:seed:postgres": "npm run db:migrate && tsx scripts/seed-postgres.ts",
     "db:seed:neo4j": "tsx scripts/seed-neo4j.ts",
-    "stack:verify": "bash scripts/verify-local-stack.sh"
+    "stack:verify": "bash scripts/verify-local-stack.sh",
+    "compose:verify": "bash scripts/verify-compose-app.sh"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",

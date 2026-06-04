@@ -67,6 +67,14 @@ npm run stack:verify
 
 This command starts Postgres and Neo4j, runs TypeORM migrations, seeds both stores, runs Next.js on `http://localhost:3100`, then asserts that `/api/health`, `/api/rag`, `/api/graph/impact`, and the document CRUD APIs use the live database stack.
 
+To verify the actual app container path with Docker Compose:
+
+```bash
+npm run compose:verify
+```
+
+This command builds and starts the Compose `app` service, one-shot `seed` service, Postgres, and Neo4j under isolated host ports, then checks database health, live GraphRAG evals, and the lease administration workflow through the containerized app.
+
 Useful local endpoints:
 
 ```bash

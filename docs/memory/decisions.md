@@ -51,3 +51,7 @@ Added eval cases for CAM obligations, permit impact, and renewal options. The ev
 ## 2026-06-04: Add lease administration workflow orchestration
 
 Added a typed workflow service and API that composes reviewed lease extraction fields, RAG citations, Neo4j impact facts, critical dates, and recommended operating actions. The live Docker verifier now asserts this workflow runs in database mode.
+
+## 2026-06-04: Verify the full Compose app container
+
+Added a dedicated Compose app verifier that builds and runs the production app container, one-shot seed container, Postgres, and Neo4j on isolated host ports. This proves the local Docker path matches the deployable container path, not only host-run Next.js with containerized databases.
