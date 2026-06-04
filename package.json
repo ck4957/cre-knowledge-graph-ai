@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "db:seed": "tsx scripts/seed-postgres.ts && tsx scripts/seed-neo4j.ts",
     "db:seed:postgres": "tsx scripts/seed-postgres.ts",
-    "db:seed:neo4j": "tsx scripts/seed-neo4j.ts"
+    "db:seed:neo4j": "tsx scripts/seed-neo4j.ts",
+    "stack:verify": "bash scripts/verify-local-stack.sh"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",

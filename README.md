@@ -52,6 +52,14 @@ Or run everything in containers:
 docker compose up --build
 ```
 
+To run the full acceptance check against live local databases:
+
+```bash
+npm run stack:verify
+```
+
+This command starts Postgres/pgvector and Neo4j, seeds both stores, runs Next.js on `http://localhost:3100`, then asserts that `/api/health`, `/api/rag`, and `/api/graph/impact` use the live database stack.
+
 Useful local endpoints:
 
 ```bash
@@ -110,4 +118,3 @@ See `infra/aws/README.md` for a deployable target architecture using:
 - Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with a repository adapter
 - Secrets Manager for database credentials
 - CloudWatch logs and alarms
-
