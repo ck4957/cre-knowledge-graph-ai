@@ -36,17 +36,33 @@ Next.js container
 
 The `terraform/` folder provisions the app runtime, ALB ingress, RDS PostgreSQL, locked-down security groups, CloudWatch logs, and the Secrets Manager entry used for `DATABASE_URL`. Neo4j is intentionally an external graph endpoint so the same application can point to Neo4j Aura, a self-managed Neo4j deployment, or a future Neptune repository adapter.
 
-1. Build and push the app image.
+1. Apply Terraform far enough to create the infrastructure outputs.
 
 ```bash
-aws ecr create-repository --repository-name cre-knowledge-graph-ai
-aws ecr get-login-password | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
-docker build -t cre-knowledge-graph-ai .
-docker tag cre-knowledge-graph-ai:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/cre-knowledge-graph-ai:latest"
-docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/cre-knowledge-graph-ai:latest"
+cd infra/aws/terraform
+cp terraform.tfvars.example terraform.tfvars
+# edit terraform.tfvars with real VPC, subnet, and graph endpoint values
+terraform init
+terraform apply -var-file=terraform.tfvars
 ```
 
-2. Provision graph storage.
+2. Build and push the app image.
+
+```bash
+AWS_REGION=us-east-1 npm run aws:image:push
+```
+
+The script reads `ecr_repository_url` from Terraform output unless `ECR_REPOSITORY_URL` is set. It tags the image with the current git SHA and `latest`, pushes both tags, and prints the immutable `container_image` value to use for the next Terraform apply.
+
+3. Re-apply Terraform with the immutable app image.
+
+```bash
+terraform -chdir=infra/aws/terraform apply \
+  -var-file=terraform.tfvars \
+  -var="container_image=$(terraform -chdir=infra/aws/terraform output -raw ecr_repository_url):$(git rev-parse --short HEAD)"
+```
+
+4. Provision graph storage.
 
 For fastest deployability, use Neo4j Aura or a Neo4j container and set:
 
@@ -64,57 +80,29 @@ npm run db:seed:neo4j
 
 For an AWS-native graph path, use Amazon Neptune and implement a second repository beside `lib/graph/neo4j-repository.ts` that sends the same `tenantImpactCypher` shape through Neptune openCypher.
 
-3. Apply Terraform.
-
-Terraform creates the app load balancer, ECS service, RDS PostgreSQL instance, generated database password, and `DATABASE_URL` secret. It also registers a one-shot ECS task definition that runs TypeORM migrations and seeds Postgres + Neo4j.
+5. Run migrations and seed data inside ECS.
 
 ```bash
-cd infra/aws/terraform
-terraform init
-terraform apply \
-  -var="aws_region=us-east-1" \
-  -var='public_subnet_ids=["subnet-public-a","subnet-public-b"]' \
-  -var='app_subnet_ids=["subnet-public-a","subnet-public-b"]' \
-  -var='database_subnet_ids=["subnet-private-a","subnet-private-b"]' \
-  -var="vpc_id=vpc-abc" \
-  -var="neo4j_password_secret_arn=arn:aws:secretsmanager:..." \
-  -var="neo4j_uri=bolt://GRAPH_HOST:7687" \
-  -var="neo4j_username=neo4j"
+AWS_REGION=us-east-1 \
+AWS_SEED_SUBNET_IDS=subnet-public-a,subnet-public-b \
+npm run aws:seed
 ```
 
-4. Run migrations and seed data inside ECS.
+6. Verify the deployed app:
 
 ```bash
-aws ecs run-task \
-  --cluster "$(terraform output -raw ecs_cluster_name)" \
-  --task-definition "$(terraform output -raw seed_task_family)" \
-  --launch-type FARGATE \
-  --network-configuration "awsvpcConfiguration={subnets=[subnet-public-a,subnet-public-b],securityGroups=[$(terraform output -raw app_security_group_id)],assignPublicIp=ENABLED}"
+npm run aws:verify
 ```
 
-5. Verify:
-
-```bash
-curl "$(terraform output -raw app_url)/api/health"
-curl -X POST "$(terraform output -raw app_url)/api/rag" \
-  -H "Content-Type: application/json" \
-  -d '{"question":"What CAM obligation changed for Northstar?"}'
-```
+`npm run aws:verify` checks `/api/health`, runs the GraphRAG eval suite against the deployed `/api/rag` endpoint, and verifies the lease administration workflow runs in database mode.
 
 ## Terraform App Scaffold
 
 ```bash
 cd infra/aws/terraform
 terraform init
-terraform apply \
-  -var="aws_region=us-east-1" \
-  -var='public_subnet_ids=["subnet-public-a","subnet-public-b"]' \
-  -var='app_subnet_ids=["subnet-public-a","subnet-public-b"]' \
-  -var='database_subnet_ids=["subnet-private-a","subnet-private-b"]' \
-  -var="vpc_id=vpc-abc" \
-  -var="neo4j_password_secret_arn=arn:aws:secretsmanager:..." \
-  -var="neo4j_uri=bolt://GRAPH_HOST:7687" \
-  -var="neo4j_username=neo4j"
+cp terraform.tfvars.example terraform.tfvars
+terraform apply -var-file=terraform.tfvars
 ```
 
 ## Production Hardening Checklist

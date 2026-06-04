@@ -16,7 +16,10 @@
     "db:seed:postgres": "npm run db:migrate && tsx scripts/seed-postgres.ts",
     "db:seed:neo4j": "tsx scripts/seed-neo4j.ts",
     "stack:verify": "bash scripts/verify-local-stack.sh",
-    "compose:verify": "bash scripts/verify-compose-app.sh"
+    "compose:verify": "bash scripts/verify-compose-app.sh",
+    "aws:image:push": "bash scripts/aws-build-push-image.sh",
+    "aws:seed": "bash scripts/aws-run-seed-task.sh",
+    "aws:verify": "bash scripts/aws-verify-app.sh"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",

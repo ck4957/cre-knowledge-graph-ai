@@ -55,3 +55,7 @@ Added a typed workflow service and API that composes reviewed lease extraction f
 ## 2026-06-04: Verify the full Compose app container
 
 Added a dedicated Compose app verifier that builds and runs the production app container, one-shot seed container, Postgres, and Neo4j on isolated host ports. This proves the local Docker path matches the deployable container path, not only host-run Next.js with containerized databases.
+
+## 2026-06-04: Add AWS operational deployment scripts
+
+Added scripts for pushing the container image to ECR, running the ECS migration/seed task, and verifying the deployed app endpoints. The AWS runbook now has executable steps instead of only descriptive commands.

@@ -1,0 +1,22 @@
+aws_region = "us-east-1"
+
+vpc_id              = "vpc-abc"
+public_subnet_ids   = ["subnet-public-a", "subnet-public-b"]
+app_subnet_ids      = ["subnet-public-a", "subnet-public-b"]
+database_subnet_ids = ["subnet-private-a", "subnet-private-b"]
+
+neo4j_uri                 = "bolt://GRAPH_HOST:7687"
+neo4j_username            = "neo4j"
+neo4j_password_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:neo4j-password"
+
+allowed_ingress_cidrs = ["0.0.0.0/0"]
+rag_top_k             = 4
+
+# For ephemeral portfolio demo environments. Use the production-safe defaults
+# from variables.tf for long-lived environments.
+database_deletion_protection    = false
+database_skip_final_snapshot    = true
+database_instance_class         = "db.t4g.micro"
+database_allocated_storage      = 20
+database_url_secret_arn         = ""
+container_image                 = ""

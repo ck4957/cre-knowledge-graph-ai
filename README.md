@@ -176,3 +176,11 @@ See `infra/aws/README.md` for a deployable target architecture using:
 - Neo4j Aura, Neo4j on ECS/EC2, or Amazon Neptune with a repository adapter
 - Secrets Manager for database credentials
 - CloudWatch logs, health checks, and a one-shot ECS migration/seed task definition
+
+Operational scripts:
+
+```bash
+npm run aws:image:push
+npm run aws:seed
+npm run aws:verify
+```
