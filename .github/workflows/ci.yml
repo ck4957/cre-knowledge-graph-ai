@@ -30,6 +30,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Evaluate local GraphRAG quality
+        run: npm run ai:evaluate
+
       - name: Audit
         run: npm audit
 

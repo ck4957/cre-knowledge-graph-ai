@@ -18,6 +18,7 @@ The project models how fragmented CRE records, including leases, spaces, tenants
 - CRUD APIs for source documents and chunks
 - Connector seams for RESO/IDX MLS feeds, PDF parsing, and Google Maps geocoding
 - Financial dashboard with KPI, line chart, and bar chart visualizations
+- Deterministic GraphRAG evals for citation relevance, graph grounding, and database-backed answer mode
 - AWS deployment blueprint for a containerized production path
 
 ## Tech Stack
@@ -101,7 +102,10 @@ Credentials:
 
 ```bash
 npm test
+npm run ai:evaluate
 ```
+
+`npm run ai:evaluate` runs deterministic GraphRAG quality checks over the local corpus. `npm run stack:verify` runs the same eval cases against the live HTTP API after standing up Postgres and Neo4j.
 
 ## CI
 

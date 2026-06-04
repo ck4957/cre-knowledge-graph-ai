@@ -90,6 +90,9 @@ if (!payload.graphFacts?.length) {
 }
 ' "${RAG_JSON}"
 
+echo "Running live GraphRAG eval suite..."
+npm run ai:evaluate:http -- "${BASE_URL}"
+
 echo "Verifying graph impact endpoint..."
 GRAPH_JSON="$(curl -fsS "${BASE_URL}/api/graph/impact?tenant=Northstar%20Logistics")"
 node -e '

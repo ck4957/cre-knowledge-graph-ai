@@ -101,6 +101,7 @@ The demo is shaped for hybrid retrieval:
 - Vector retrieval finds semantically relevant document excerpts.
 - Graph traversal expands through related tenants, spaces, leases, and obligations.
 - The answer layer cites both graph facts and source evidence.
+- GraphRAG evals assert citation relevance, entity references, answer terms, graph facts, and database-backed mode for critical portfolio questions.
 
 The current local implementation uses deterministic embeddings so the system runs without an external AI API key. A production implementation can replace `lib/rag/embedding.ts` with OpenAI, Bedrock, or another embedding provider without changing the database or graph repository boundaries.
 

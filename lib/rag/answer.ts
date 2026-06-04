@@ -22,7 +22,12 @@ export function buildGraphAugmentedAnswer(
       ? `The strongest document evidence is from "${strongestCitation.title}": ${strongestCitation.content}`
       : "No document evidence was retrieved.",
     strongestGraphFact
-      ? `The graph traversal connects ${strongestGraphFact.tenant} to ${strongestGraphFact.space}, ${strongestGraphFact.lease}, ${strongestGraphFact.amendment}, and ${strongestGraphFact.obligation}.`
+      ? [
+          `The graph traversal connects ${strongestGraphFact.tenant} to ${strongestGraphFact.space}, ${strongestGraphFact.lease}, ${strongestGraphFact.amendment}, and ${strongestGraphFact.obligation}.`,
+          strongestGraphFact.permit ? `Related permit context: ${strongestGraphFact.permit}.` : null
+        ]
+          .filter(Boolean)
+          .join(" ")
       : "No graph impact path was found for the detected tenant.",
     `Question analyzed: ${question}`
   ];
@@ -38,4 +43,3 @@ export function buildGraphAugmentedAnswer(
 export function detectTenantName(question: string): string {
   return question.toLowerCase().includes("northstar") ? "Northstar Logistics" : "Northstar Logistics";
 }
-

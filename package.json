@@ -8,6 +8,8 @@
     "build": "next build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "ai:evaluate": "tsx scripts/evaluate-graphrag.ts local",
+    "ai:evaluate:http": "tsx scripts/evaluate-graphrag.ts http",
     "db:migrate": "tsx scripts/run-migrations.ts run",
     "db:revert": "tsx scripts/run-migrations.ts revert",
     "db:seed": "npm run db:migrate && tsx scripts/seed-postgres.ts && tsx scripts/seed-neo4j.ts",

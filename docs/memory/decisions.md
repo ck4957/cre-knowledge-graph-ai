@@ -43,3 +43,7 @@ Neo4j Cypher queries live under `lib/graph/` and API routes call repository func
 ## 2026-06-04: Make AWS deployability concrete
 
 Expanded Terraform from an ECS-only scaffold into an ALB + ECS Fargate + RDS PostgreSQL stack with generated database credentials, Secrets Manager wiring, CloudWatch logs, restricted security groups, and a one-shot seed task definition for TypeORM migrations plus RAG/graph seed data.
+
+## 2026-06-04: Add deterministic GraphRAG evals
+
+Added eval cases for CAM obligations, permit impact, and renewal options. The eval harness checks citation terms, entity references, answer terms, graph facts, and database mode so CI can catch regressions where the product stops using lease evidence or the graph.
