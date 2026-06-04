@@ -46,7 +46,7 @@ npm run db:seed
 npm run dev
 ```
 
-Or run everything in containers:
+Or run everything in containers. The Compose stack includes a one-shot `seed` service, so the app waits until Postgres/pgvector and Neo4j are seeded.
 
 ```bash
 docker compose up --build
@@ -84,6 +84,10 @@ Credentials:
 ```bash
 npm test
 ```
+
+## CI
+
+GitHub Actions runs typecheck, tests, audit, production build, Docker Compose config validation, Terraform validation, and a live Docker-stack job that executes `npm run stack:verify`.
 
 ## Project Structure
 
